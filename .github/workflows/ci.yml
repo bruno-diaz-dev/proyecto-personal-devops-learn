@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  REGITRY: ghcr.io
+  REGISTRY: ghcr.io
   IMAGE_BASE: ${{ github.repository }}
 
 permissions:
@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 jobs:
-  buid:
+  build:
     runs-on: ubuntu-latest
     outputs:
       backend_tag: ${{ steps.meta_backend.outputs.version }}
@@ -51,6 +51,15 @@ jobs:
           images: ghcr.io/${{ env.IMAGE_BASE }}/frontend
           tags: type=sha
 
+
+      - name: Trivy Scan Backend
+        run: |
+         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+          ./trivy image \
+            --exit-code 1 \
+            --severity CRITICAL,HIGH \
+            ghcr.io/${{ env.IMAGE_BASE }}/backend:${{ steps.meta_backend.outputs.version }}
+     
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
         with:
@@ -58,3 +67,9 @@ jobs:
           push: true
           tags: ${{ steps.meta_frontend.outputs.tags }}
 
+      - name: Trivy Scan Frontend
+        run: |
+          ./trivy image \
+          --exit-code 1 \
+          --severity CRITICAL,HIGH \
+          ghcr.io/${{ env.IMAGE_BASE }}/frontend:${{ steps.meta_frontend.outputs.version }}

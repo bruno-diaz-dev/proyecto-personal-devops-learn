@@ -12,12 +12,13 @@ jobs:
     steps:
       - name: Pull backend image
         run: |
+          SHORT_SHA=${ github.sha::7 }
           docker pull ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
 
       - name: Run backend
         run: |
           docker run -d -p 8080:8080 \ 
-            ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+            ghcr.io/${{ github.repository }}/backend:sha-$SHORT_SHA
 
       - name: Health check
         run: |
