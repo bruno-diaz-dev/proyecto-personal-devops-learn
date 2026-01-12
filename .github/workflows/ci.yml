@@ -9,6 +9,10 @@ env:
   REGITRY: ghcr.io
   IMAGE_BASE: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   buid:
     runs-on: ubuntu-latest
