@@ -76,4 +76,5 @@ jobs:
           --ignore-unfixed \
           --exit-code 1 \
           --severity CRITICAL \
+          --no-progress \
           ghcr.io/${{ env.IMAGE_BASE }}/frontend:${{ steps.meta_frontend.outputs.version }}
