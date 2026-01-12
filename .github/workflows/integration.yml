@@ -1,0 +1,25 @@
+name: Integration Tests
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and push"]
+    types: [completed]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull backend image
+        run: |
+          docker pull ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+
+      - name: Run backend
+        run: |
+          docker run -d -p 8080:8080 \ 
+            ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+
+      - name: Health check
+        run: |
+          sleep 15
+          curl -f http://localhost:8080/api/health

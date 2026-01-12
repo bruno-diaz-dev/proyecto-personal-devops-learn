@@ -1,0 +1,19 @@
+name: Promote Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [dev, stage, prod]
+      image_tag:
+        description: Image SHA tag
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: |
+          echo "Promoting image ${{ inputs.image_tag}} to ${{ inputs.environment }}
