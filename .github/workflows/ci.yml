@@ -55,7 +55,7 @@ jobs:
       - name: Trivy Scan Backend
         run: |
          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-          ./trivy image \
+          ./bin/trivy image \
             --exit-code 1 \
             --severity CRITICAL,HIGH \
             ghcr.io/${{ env.IMAGE_BASE }}/backend:${{ steps.meta_backend.outputs.version }}
@@ -69,7 +69,7 @@ jobs:
 
       - name: Trivy Scan Frontend
         run: |
-          ./trivy image \
+          ./bin/trivy image \
           --exit-code 1 \
           --severity CRITICAL,HIGH \
           ghcr.io/${{ env.IMAGE_BASE }}/frontend:${{ steps.meta_frontend.outputs.version }}
