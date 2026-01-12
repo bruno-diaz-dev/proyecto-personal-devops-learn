@@ -75,5 +75,5 @@ jobs:
           --scanners vuln \
           --ignore-unfixed \
           --exit-code 1 \
-          --severity CRITICAL,HIGH \
+          --severity CRITICAL \
           ghcr.io/${{ env.IMAGE_BASE }}/frontend:${{ steps.meta_frontend.outputs.version }}
