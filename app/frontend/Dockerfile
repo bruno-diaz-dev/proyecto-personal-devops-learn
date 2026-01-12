@@ -1,5 +1,5 @@
 # Frontend Dockerfile
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Crear usuario no-root
 RUN addgroup -g 1001 -S nodejs
