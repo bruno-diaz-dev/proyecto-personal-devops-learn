@@ -50,6 +50,7 @@ Thumbs.db
 !app/frontend/tsconfig.node.json
 !app/frontend/vite.config.ts
 !app/frontend/.eslintrc.json
+!app/frontend/package-lock.json
 
 # Archivos de Azure
 .azure/
