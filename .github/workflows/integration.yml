@@ -21,7 +21,7 @@ jobs:
 
       - name: Run backend
         run: |
-          docker run -d -p 8080:5000 \
+          docker run -d -p 8080:8080 \
             ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
 
       - name: Health check
