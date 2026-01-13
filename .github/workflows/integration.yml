@@ -23,7 +23,10 @@ jobs:
       - name: Run backend
         run: |
           docker run -d -p 8080:5000 \
-            ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
+          -e FLASK_ENV=testing \
+          -e FLASK_DEBUG=false \
+          ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
+
       - name: Show backend logs
         run: |
           docker ps -a
