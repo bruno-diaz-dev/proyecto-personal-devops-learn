@@ -9,40 +9,61 @@ monitoring_bp = Blueprint('monitoring', __name__, url_prefix='/api')
 # Variable global para tracking de uptime
 start_time = time.time()
 
+# --------------------------------------------------
+# LIVENESS PROBE (CI / Docker / Load Balancer)
+# --------------------------------------------------
 @monitoring_bp.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint for load balancer and monitoring"""
+    """Liveness probe - application is running"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'version': '1.0.0',
+        'uptime': time.time() - start_time
+    }), 200
+
+
+# --------------------------------------------------
+# READINESS PROBE (Production / Dependencies)
+# --------------------------------------------------
+@monitoring_bp.route('/ready', methods=['GET'])
+def readiness_check():
+    """Readiness probe - checks database connectivity"""
     try:
-        # Test database connection
         from sqlalchemy import text
         db.session.execute(text('SELECT 1'))
         db_status = 'healthy'
+        status_code = 200
     except Exception:
         db_status = 'unhealthy'
-    
-    return jsonify({
-        'status': 'healthy' if db_status == 'healthy' else 'unhealthy',
-        'timestamp': datetime.utcnow().isoformat(),
-        'version': '1.0.0',
-        'database': db_status,
-        'uptime': time.time() - start_time
-    })
+        status_code = 503
 
+    return jsonify({
+        'status': 'ready' if db_status == 'healthy' else 'not_ready',
+        'database': db_status,
+        'timestamp': datetime.utcnow().isoformat()
+    }), status_code
+
+
+# --------------------------------------------------
+# METRICS ENDPOINT (Prometheus style)
+# --------------------------------------------------
 @monitoring_bp.route('/metrics', methods=['GET'])
 def metrics():
     """Prometheus metrics endpoint"""
     try:
-        # Métricas básicas del sistema
+        # System metrics
         cpu_percent = psutil.cpu_percent()
         memory = psutil.virtual_memory()
-        
-        # Métricas de la aplicación
-        User = current_app.User
-        Task = current_app.Task
-        user_count = User.query.count()
-        task_count = Task.query.count()
-        completed_tasks = Task.query.filter_by(completed=True).count()
-        
+
+        # Application metrics (safe access)
+        User = getattr(current_app, 'User', None)
+        Task = getattr(current_app, 'Task', None)
+
+        user_count = User.query.count() if User else 0
+        task_count = Task.query.count() if Task else 0
+        completed_tasks = Task.query.filter_by(completed=True).count() if Task else 0
+
         metrics_text = f"""# HELP flask_app_users_total Total number of users
 # TYPE flask_app_users_total counter
 flask_app_users_total {user_count}
@@ -67,8 +88,7 @@ flask_app_memory_usage {memory.percent}
 # TYPE flask_app_uptime counter
 flask_app_uptime {time.time() - start_time}
 """
-        
         return metrics_text, 200, {'Content-Type': 'text/plain; charset=utf-8'}
-    
+
     except Exception as e:
         return f"# Error generating metrics: {str(e)}", 500, {'Content-Type': 'text/plain; charset=utf-8'}
