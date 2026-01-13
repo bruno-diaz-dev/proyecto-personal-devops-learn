@@ -24,6 +24,10 @@ jobs:
         run: |
           docker run -d -p 8080:5000 \
             ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
+      - name: Show backend logs
+        run: |
+          docker ps -a
+          docker logs $(docker ps -aq --filter ancestor=ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}) || true
 
       - name: Health check
         run: |
