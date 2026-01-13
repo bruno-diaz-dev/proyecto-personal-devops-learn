@@ -10,15 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Resolve image SHA
+        run: |
+          SHORT_SHA=${{ github.event.workflow_run.head_sha }}
+          echo "SHORT_SHA=${SHORT_SHA::7}" >> $GITHUB_ENV
+
       - name: Pull backend image
         run: |
-          SHORT_SHA=${ github.sha::7 }
-          docker pull ghcr.io/${{ github.repository }}/backend:sha-${{ github.sha }}
+          docker pull ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
 
       - name: Run backend
         run: |
-          docker run -d -p 8080:8080 \ 
-            ghcr.io/${{ github.repository }}/backend:sha-$SHORT_SHA
+          docker run -d -p 8080:5000 \
+            ghcr.io/${{ github.repository }}/backend:sha-${{ env.SHORT_SHA }}
 
       - name: Health check
         run: |
